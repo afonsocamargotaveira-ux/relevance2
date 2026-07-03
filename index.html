@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>relevance – Avaliação de Aderência</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">🎯</div>
+        <div>
+          <div class="logo-text">relevance</div>
+          <div class="logo-sub">Avaliação de Proposições</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+
+      <div class="section-label">📌 Tema Principal (opcional)</div>
+      <input id="mainTheme" type="text" placeholder='Ex.: pessoa com deficiência ou deficien* — deixe em branco para listar todas'>
+
+      <div class="spacer"></div>
+      <div class="section-label">🏷️ Termos Adicionais</div>
+      <p class="caption">Um termo por linha, ou separados por vírgula</p>
+      <textarea id="extraTerms" rows="7" placeholder='cadeirante*&#10;"cadeira de rodas"&#10;braile&#10;libras&#10;autismo&#10;TEA'></textarea>
+
+      <div class="spacer"></div>
+      <div class="section-label">🚫 Termos de Exclusão</div>
+      <p class="caption">Se encontrado → índice 1 automático</p>
+      <textarea id="excludeTerms" rows="4" placeholder='Ex.: feirante*&#10;"comércio ambulante"&#10;precatório'></textarea>
+
+      <div class="radio-group">
+        <label class="radio-title">Buscar termo de exclusão:</label>
+        <div class="radio-options">
+          <label><input type="radio" name="excludeScope" value="Ementa e Indexação" checked> Ementa e Indexação</label>
+          <label><input type="radio" name="excludeScope" value="Somente Ementa"> Somente Ementa</label>
+          <label><input type="radio" name="excludeScope" value="Somente Indexação"> Somente Indexação</label>
+        </div>
+      </div>
+
+      <div id="termCount" class="term-count"></div>
+
+      <div class="divider"></div>
+      <div class="syntax-help">
+        <b>Sintaxe:</b><br>
+        <code>deficien*</code> → começa com <i>deficien</i><br>
+        <code>"cadeira de rodas"</code> → frase exata<br>
+        <code>autismo</code> → palavra exata<br><br>
+        A busca é feita apenas na <b>Ementa</b> e na <b>Indexação</b>.
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">📂 Planilha de Entrada</div>
+      <input id="fileInput" type="file" accept=".xlsx">
+
+      <label class="checkbox-line">
+        <input type="checkbox" id="fetchTeor" checked>
+        Consultar Inteiro Teor quando disponível (pode ser lento — veja nota no rodapé)
+      </label>
+
+      <div class="spacer"></div>
+      <button id="runBtn" class="primary-btn">▶ Avaliar Proposições</button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <h2>Avaliação de Aderência Temática</h2>
+      <p class="subtitle">Analise proposições legislativas e exporte os resultados com índice e justificativa.</p>
+      <div class="divider"></div>
+
+      <div id="intro" class="intro-cards">
+        <div class="result-card center">
+          <div class="icon">📁</div>
+          <div class="card-title">1. Carregue a planilha</div>
+          <div class="card-desc">Faça upload do arquivo .xlsx</div>
+        </div>
+        <div class="result-card center">
+          <div class="icon">✏️</div>
+          <div class="card-title">2. Defina o tema</div>
+          <div class="card-desc">Tema e termos adicionais na barra lateral</div>
+        </div>
+        <div class="result-card center">
+          <div class="icon">⬇️</div>
+          <div class="card-title">3. Exporte o resultado</div>
+          <div class="card-desc">Baixe o Excel com índices e justificativas</div>
+        </div>
+      </div>
+
+      <div id="columnConfig" class="hidden">
+        <details class="expander">
+          <summary>⚙️ Configurar colunas (clique para ajustar se necessário)</summary>
+          <p class="caption">O app detectou automaticamente as colunas abaixo. Corrija se necessário.</p>
+          <div class="col-grid">
+            <div>
+              <label>Coluna da Ementa</label>
+              <select id="colEmenta"></select>
+            </div>
+            <div>
+              <label>Coluna da Indexação (opcional)</label>
+              <select id="colIndexa"></select>
+            </div>
+            <div>
+              <label>Coluna adicional de texto (ex: Tema) — opcional</label>
+              <select id="colExtraText"></select>
+            </div>
+            <div>
+              <label>Coluna do Inteiro Teor (fallback) — opcional</label>
+              <select id="colTeor"></select>
+            </div>
+          </div>
+          <p class="caption">Se nenhum termo for encontrado na Ementa/Indexação, o Inteiro Teor será consultado como fallback → índice 2.</p>
+        </details>
+      </div>
+
+      <div id="status"></div>
+
+      <div id="results" class="hidden">
+        <h3>📊 Resumo da Avaliação</h3>
+        <div id="summaryCards" class="summary-cards"></div>
+
+        <div class="divider"></div>
+        <h3>🔍 Pré-visualização dos Resultados</h3>
+        <div class="table-wrap">
+          <table id="resultsTable">
+            <thead><tr><th>Proposição</th><th>Índice</th><th>Justificativa</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="divider"></div>
+        <h3>⬇️ Exportar Resultado</h3>
+        <a id="downloadBtn" class="primary-btn download-btn" download="proposicoes_avaliadas.xlsx">📥 Baixar planilha com avaliação (.xlsx)</a>
+        <p class="caption">Índice de aderência na coluna B · Justificativa na coluna C</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
